@@ -9,6 +9,9 @@ g_lines = []
 tri_lines = []
 intersection_points = []
 
+average_x = 0
+average_y = 0
+
 B1 = 0
 B2 = 0
 A1 = 0
@@ -21,7 +24,7 @@ speed_y = 0
 tri_x = 300
 tri_y = 10
 
-squares = [(0, 400), (500, 400), (500, 500), (0, 500), (0, 0), (200, 0), (200, 100), (0, 100)]
+squares = [(0, 300), (500, 400), (500, 500), (0, 500), (0, 0), (200, 0), (200, 100), (0, 100)]
 
 triangle = [(-50, -50), (50, -50), (0, 50)]
 
@@ -36,10 +39,35 @@ angle = 3.14159
 
 detect = 0
 
+rep = 0
 
 # A = y2 - y1
 # B = x1 - x2
 # C = A(x1) - B(y1)
+
+
+def collide_x():
+    global tri_x, speed_x
+    if detect_collision():
+        tri_x, speed_x = player.collide_x(speed_x, tri_x)
+
+
+def collide_y():
+    global tri_y, speed_y
+    if detect_collision():
+        tri_y, speed_y = player.collide_y(speed_y, tri_y)
+        tri_y += 1
+        if detect_collision():
+            if keys[pygame.K_UP]:
+                speed_y -= 10
+        tri_y -= 1
+        physics()
+
+
+def collide_rot():
+    global angle, angle_v
+    if detect_collision():
+        angle, angle_v = player.collide_rotate(angle_v, angle)
 
 
 def setup(tri=(), squ=()):
@@ -106,6 +134,11 @@ def move_x():
     tri_x, speed_x = player.slow_x(.9, speed_x, tri_x)
 
 
+def gravity():
+    global tri_y, speed_y
+    tri_y, speed_y = player.slow_y(.1, speed_y, tri_y)
+
+
 def draw():
 
     for e in tri_lines:
@@ -156,7 +189,7 @@ def calc_intersect(lin=(), ground=()):
     return intersection_points
 
 
-def segment_intersection(lin=(), ground=()):
+def segment_intersection(lin=(), ground=(), y=0):
     global A1
     global B1
     global A2
@@ -223,6 +256,29 @@ def segment_intersection(lin=(), ground=()):
     return intersection_points
 
 
+def physics():
+    global intersection_points, angle_v, average_x, rep, average_y
+    average_x = 0
+    average_y = 0
+    rep = 0
+
+    for e in intersection_points:
+        average_x += e[0]
+        if e[1]:
+            average_y += 100/e[1]
+        rep += 1
+
+    if rep:
+        average_x = average_x / rep
+        average_y = average_y / rep
+
+    # print(tri_x, tri_y)
+    # print(average_x, average_y)
+
+    angle_v += (tri_x - average_x + average_y)/1000
+    # print(angle_v)
+
+
 setup(triangle, squares)
 
 
@@ -235,22 +291,15 @@ while running:
 
     move_x()
 
-    if detect_collision():
-        tri_x, speed_x = player.collide_x(speed_x, tri_x)
+    collide_x()
 
     rotate()
 
-    angle = round(angle*360)/360
+    collide_rot()
 
-    tri_y, speed_y = player.slow_y(.1, speed_y, tri_y)
+    gravity()
 
-    if detect_collision():
-        tri_y, speed_y = player.collide_y(speed_y, tri_y)
-        tri_y += 1
-        if detect_collision():
-            if keys[pygame.K_UP]:
-                speed_y -= 10
-        tri_y -= 1
+    collide_y()
 
     pygame.display.update()
     for event in pygame.event.get():
