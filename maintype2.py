@@ -87,16 +87,6 @@ def collide_y():
 
 def collide_rot():
     global angle, angle_v, tri_y
-    # if detect_collision():
-    #     tri_y -= 1
-    #     if detect_collision():
-    #         tri_y -= 1
-    #         if detect_collision():
-    #             tri_y -= 1
-    #             if detect_collision():
-    #                 tri_y -= 1
-    #                 if detect_collision():
-    #                     tri_y += 4
     if detect_collision():
         angle, angle_v = player.collide_rotate(angle_v, angle)
 
@@ -115,11 +105,6 @@ def setup(tri=(), squ=()):
             average_x += e[0]
             average_y += e[1]
             rep += 1
-
-        # center_x = tri_x - (average_x / rep)
-        # center_y = tri_y - (average_y / rep)
-        # print(center_y, center_x)
-        # print(tri_x, tri_y)
 
         for r in range(len(tri) - 1):
             part1 = tri[r]
@@ -228,9 +213,6 @@ def calc_intersect(lin=(), ground=()):
         A1 = p0[1] - p1[1]
         B1 = p0[0] - p1[0]
         C1 = A1 * p0[0] - B1 * p0[1]
-        # A = y2 - y1
-        # B = x1 - x2
-        # C = A(x1) - B(y1)
 
         for j in ground:
             p2 = j[0]
